@@ -23,8 +23,6 @@ module OCaml.BuckleScript.Encode
 import Control.Monad.Reader
 import qualified Data.List as L
 import Data.Maybe (catMaybes)
-import Data.Monoid ((<>))
-import Data.Proxy (Proxy (..))
 import Data.Typeable
 
 -- aeson
@@ -258,7 +256,7 @@ instance HasEncoder OCamlValue where
   render ref@(OCamlRef typeRef name) = do
     mOCamlTypeMetaData <- asks topLevelOCamlTypeMetaData
     case mOCamlTypeMetaData of
-      Nothing -> fail $ "OCaml.BuckleScript.Encode (HasEncoder (OCamlRef typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
+      Nothing -> error $ "OCaml.BuckleScript.Encode (HasEncoder (OCamlRef typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
       Just ocamlTypeRef -> do
         ds <- asks (dependencies . userOptions)
         pure . stext $ appendModule ds ocamlTypeRef typeRef name
@@ -266,7 +264,7 @@ instance HasEncoder OCamlValue where
   render ref@(OCamlRefApp typRep values) = do
     mOCamlTypeMetaData <- asks topLevelOCamlTypeMetaData
     case mOCamlTypeMetaData of
-      Nothing -> fail $ "OCaml.BuckleScript.Encode (HasEncoder (OCamlRef typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
+      Nothing -> error $ "OCaml.BuckleScript.Encode (HasEncoder (OCamlRef typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
       Just ocamlTypeRef -> do
         ds <- asks (dependencies . userOptions)
         dx <- renderRef values
@@ -296,7 +294,7 @@ instance HasEncoderRef OCamlValue where
   renderRef (OCamlRef metadata ref) = do
     mOCamlTypeMetaData <- asks topLevelOCamlTypeMetaData
     case mOCamlTypeMetaData of
-      Nothing -> fail $ "OCaml.BuckleScript.Encode (HasEncoder (OCamlRef typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
+      Nothing -> error $ "OCaml.BuckleScript.Encode (HasEncoder (OCamlRef typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
       Just ocamlTypeRef -> do
         ds <- asks (dependencies . userOptions)
         pure $ stext (appendModule ds ocamlTypeRef metadata ref)

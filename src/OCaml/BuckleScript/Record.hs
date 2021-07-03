@@ -21,8 +21,6 @@ module OCaml.BuckleScript.Record
 import Control.Monad.Reader
 import Data.List (nub, sort)
 import Data.Maybe (catMaybes)
-import Data.Monoid ((<>))
-import Data.Proxy (Proxy (..))
 import Data.Typeable
 
 -- containers
@@ -103,7 +101,7 @@ instance HasTypeRef OCamlDatatype where
           Just parOCamlTypeMetaData -> do
             let prefix = stext $ mkModulePrefix decOCamlTypeMetaData parOCamlTypeMetaData
             pure $ (parensIfNotBlank dx) <+> prefix <> name
-          Nothing -> fail ("expected to find dependency:\n\n" ++ "\n\nin\n\n" ++ show ds)
+          Nothing -> error ("expected to find dependency:\n\n" ++ (show $ typeRepToHaskellTypeMetaData typRep) ++ "\n\nin\n\n" ++ show ds)
 
   renderRef datatype@(OCamlDatatype typeRef typeName _) = do
     if isTypeParameterRef datatype
@@ -120,7 +118,7 @@ instance HasTypeRef OCamlDatatype where
             Just parOCamlTypeMetaData -> do
               let prefix = stext $ mkModulePrefix decOCamlTypeMetaData parOCamlTypeMetaData
               pure $ prefix <> (stext . textLowercaseFirst $ typeName)
-            Nothing -> fail ("expected to find dependency:\n\n" ++ show typeRef ++ "\n\nin\n\n" ++ show ds)
+            Nothing -> error ("expected to find dependency:\n\n" ++ show typeRef ++ "\n\nin\n\n" ++ show ds)
 
   renderRef (OCamlPrimitive primitive) = renderRef primitive
 
@@ -166,7 +164,7 @@ instance HasType OCamlValue where
   render ref@(OCamlRef typeRef name) = do
     mOCamlTypeMetaData <- asks topLevelOCamlTypeMetaData
     case mOCamlTypeMetaData of
-      Nothing -> fail $ "OCaml.BuckleScript.Record (HasType (OCamlDatatype typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
+      Nothing -> error $ "OCaml.BuckleScript.Record (HasType (OCamlDatatype typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
       Just ocamlTypeRef -> do
         ds <- asks (dependencies . userOptions)
         pure . stext $ appendModule ds ocamlTypeRef typeRef name
@@ -174,7 +172,7 @@ instance HasType OCamlValue where
   render (OCamlRefApp typRep values) = do
     mOCamlTypeMetaData <- asks topLevelOCamlTypeMetaData
     case mOCamlTypeMetaData of
-      Nothing -> fail $ "OCaml.BuckleScript.Record (HasType (OCamlDatatype typeRep name)) mOCamlTypeMetaData is Nothing:\n\n"
+      Nothing -> error $ "OCaml.BuckleScript.Record (HasType (OCamlDatatype typeRep name)) mOCamlTypeMetaData is Nothing:\n\n"
       Just ocamlTypeRef -> do
         ds <- asks (dependencies . userOptions)
         dx <- render values

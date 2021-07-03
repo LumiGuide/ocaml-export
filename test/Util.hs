@@ -2,7 +2,6 @@
 
 module Util where
 -- base
-import Data.Monoid ((<>))
 import Data.Time
 -- text
 import qualified Data.Text.IO as T

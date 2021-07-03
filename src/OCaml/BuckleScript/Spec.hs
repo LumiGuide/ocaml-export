@@ -8,8 +8,6 @@ module OCaml.BuckleScript.Spec
   , typeInFileToOCamlSpec
   ) where
 
--- base
-import Data.Monoid ((<>))
 -- text
 import Data.Text (Text)
 import qualified Data.Text as T

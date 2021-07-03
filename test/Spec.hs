@@ -7,8 +7,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeOperators #-}
 
--- base
-import Data.Monoid ((<>))
 -- hspec
 import Test.Hspec
 -- ocaml-export

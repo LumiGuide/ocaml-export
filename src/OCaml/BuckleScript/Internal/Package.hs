@@ -44,7 +44,6 @@ module OCaml.BuckleScript.Internal.Package
   ) where
 
 -- base
-import Data.Monoid ((<>))
 import Data.Proxy (Proxy (..))
 import Data.Typeable (typeRep, Typeable, typeRepTyCon, tyConName, tyConModule, tyConPackage)
 
@@ -72,12 +71,13 @@ import Servant.API ((:>), (:<|>))
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
+import Data.Kind (Type)
 
 -- ==============================================
 -- Types
 -- ==============================================
 
-data OCamlPackage (packageName :: Symbol) (packageDependencies :: [*])
+data OCamlPackage (packageName :: Symbol) (packageDependencies :: [Type])
   deriving Typeable
 
 type NoDependency = '[]
@@ -231,7 +231,7 @@ type family (HasOCamlTypeMetaDataFlag a) :: Nat where
 class HasOCamlTypeMetaData' a where
   mkOCamlTypeMetaData' :: [Text] -> [Text] -> Proxy a -> [(HaskellTypeMetaData,OCamlTypeMetaData)]
 
-instance (HasOCamlTypeMetaDataFlag a ~ flag, HasOCamlTypeMetaData'' flag (a :: *)) => HasOCamlTypeMetaData' a where
+instance (HasOCamlTypeMetaDataFlag a ~ flag, HasOCamlTypeMetaData'' flag (a :: Type)) => HasOCamlTypeMetaData' a where
   mkOCamlTypeMetaData' = mkOCamlTypeMetaData'' (Proxy :: Proxy flag)
 
 class HasOCamlTypeMetaData'' (flag :: Nat) a where

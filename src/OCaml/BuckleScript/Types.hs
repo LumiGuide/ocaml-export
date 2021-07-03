@@ -30,6 +30,7 @@ module OCaml.BuckleScript.Types
   , EnumeratorConstructor (..)
   , OCamlValue (..)
   , OCamlType (..)
+  , GenericOCamlDatatype (..)
   , HaskellTypeMetaData (..)
   , OCamlTypeMetaData (..)
 
@@ -61,11 +62,10 @@ module OCaml.BuckleScript.Types
 import Data.Int (Int16, Int32, Int64, Int8)
 import Data.List (nub)
 import Data.Maybe (catMaybes)
-import Data.Monoid ((<>))
 import Data.Proxy
 import Data.Time
 import Data.Typeable
-import Data.Word (Word, Word8, Word16, Word32, Word64)
+import Data.Word (Word8, Word16, Word32, Word64)
 import GHC.Generics
 import GHC.TypeLits (symbolVal, KnownSymbol)
 import Prelude

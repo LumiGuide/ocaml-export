@@ -41,7 +41,6 @@ module OCaml.BuckleScript.Internal.Spec
 
 -- base
 import Data.Proxy
-import Data.Semigroup (Semigroup (..))
 import GHC.Generics
 import GHC.TypeLits
 
@@ -72,11 +71,11 @@ import Test.QuickCheck.Arbitrary.ADT
 import Servant.API
 
 -- template-haskell
-import Language.Haskell.TH
+import Language.Haskell.TH hiding (Type)
 
 -- text
 import Data.Text (Text)
-
+import Data.Kind (Type)
 
 mkOCamlSpecServer :: forall ocamlPackage. (OCamlPackageTypeCount ocamlPackage) => String -> Proxy ocamlPackage -> Q [Dec]
 mkOCamlSpecServer typeName Proxy = do
@@ -107,7 +106,7 @@ mkOCamlSpecServer typeName Proxy = do
 class HasMkGoldenFiles a where
   mkGoldenFiles :: Proxy a -> Int -> FilePath -> IO ()
 
-instance (HasMkGoldenFilesFlag a ~ flag, HasMkGoldenFiles' flag (a :: *)) => HasMkGoldenFiles a where
+instance (HasMkGoldenFilesFlag a ~ flag, HasMkGoldenFiles' flag (a :: Type)) => HasMkGoldenFiles a where
   mkGoldenFiles = mkGoldenFiles' (Proxy :: Proxy flag)
 
 type family (HasMkGoldenFilesFlag a) :: Nat where
@@ -156,7 +155,7 @@ instance (ToADTArbitrary a, ToJSON a) => HasMkGoldenFiles' 1 a where
 class HasRunGoldenSpec a where
   runGoldenSpec :: Proxy a -> Int -> FilePath -> Spec
 
-instance (HasRunGoldenSpecFlag a ~ flag, HasRunGoldenSpec' flag (a :: *)) => HasRunGoldenSpec a where
+instance (HasRunGoldenSpecFlag a ~ flag, HasRunGoldenSpec' flag (a :: Type)) => HasRunGoldenSpec a where
   runGoldenSpec = runGoldenSpec' (Proxy :: Proxy flag)
 
 type family (HasRunGoldenSpecFlag a) :: Nat where
@@ -207,13 +206,13 @@ instance (Arbitrary a, Eq a, Show a, ToADTArbitrary a, FromJSON a, ToJSON a) => 
   runGoldenSpec' _ Proxy size fp = roundtripAndGoldenADTSpecsWithSettings (defaultSettings {sampleSize = size, goldenDirectoryOption = CustomDirectoryName fp}) (Proxy :: Proxy a)
 
 -- | Convert an OCamlPackage into a servant API.
-type family MkOCamlSpecAPI a :: * where
+type family MkOCamlSpecAPI a :: Type where
   MkOCamlSpecAPI (OCamlPackage a deps :> rest) = MkOCamlSpecAPI rest  
   MkOCamlSpecAPI ((OCamlModule modules :> api) :<|> rest) = MkOCamlSpecAPI' modules '[] api :<|> MkOCamlSpecAPI rest
   MkOCamlSpecAPI (OCamlModule modules :> api) = MkOCamlSpecAPI' modules '[] api
 
 -- | Utility type level function.
-type family MkOCamlSpecAPI' modules subModules api :: * where
+type family MkOCamlSpecAPI' modules subModules api :: Type where
   MkOCamlSpecAPI' modules subModules ((OCamlSubModule restSubModules) :> a) = MkOCamlSpecAPI' modules (Append subModules '[restSubModules]) a
   MkOCamlSpecAPI' modules subModules (a :> b) = MkOCamlSpecAPI' modules subModules a :<|> MkOCamlSpecAPI' modules subModules b
   MkOCamlSpecAPI' modules subModules (HaskellTypeName name (OCamlTypeInFile api _typeFilePath)) = OCamlSpecAPI modules subModules api ('Just name)
@@ -227,7 +226,7 @@ type OCamlSpecAPI (modules :: [Symbol]) (subModules :: [Symbol]) typ (mType :: M
 class OCamlModuleTypeCount api where
   ocamlModuleTypeCount :: Proxy api -> Int
     
-instance (OCamlModuleTypeCountFlag a ~ flag, OCamlModuleTypeCount' flag (a :: *)) => OCamlModuleTypeCount a where
+instance (OCamlModuleTypeCountFlag a ~ flag, OCamlModuleTypeCount' flag (a :: Type)) => OCamlModuleTypeCount a where
   ocamlModuleTypeCount = ocamlModuleTypeCount' (Proxy :: Proxy flag)
 
 type family (OCamlModuleTypeCountFlag a) :: Bool where
@@ -254,7 +253,7 @@ instance OCamlModuleTypeCount' 'False a where
 class OCamlPackageTypeCount modules where                
   ocamlPackageTypeCount :: Proxy modules -> [Int]
 
-instance (OCamlPackageTypeCountFlag a ~ flag, OCamlPackageTypeCount' flag (a :: *)) => OCamlPackageTypeCount a where
+instance (OCamlPackageTypeCountFlag a ~ flag, OCamlPackageTypeCount' flag (a :: Type)) => OCamlPackageTypeCount a where
   ocamlPackageTypeCount = ocamlPackageTypeCount' (Proxy :: Proxy flag)
 
 type family (OCamlPackageTypeCountFlag a) :: Bool where
@@ -307,6 +306,6 @@ type family Insert a b xs where
   Insert a b (x ': xs) = x ': (Insert a b xs)
 
 -- | Concat a Symbol the end of a list of Symbols.
-type family ConcatSymbols xs rhs :: * where
+type family ConcatSymbols xs rhs :: Type where
   ConcatSymbols '[] rhs = rhs
   ConcatSymbols (x ': xs) rhs = x :> ConcatSymbols xs rhs

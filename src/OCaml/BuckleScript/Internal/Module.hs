@@ -38,7 +38,6 @@ module OCaml.BuckleScript.Internal.Module
   ) where
 
 -- base
-import Data.Monoid ((<>))
 import Data.Proxy (Proxy (..))
 import Data.Typeable (Typeable, typeRep, typeRepTyCon, tyConName, splitTyConApp) 
 import GHC.TypeLits (Nat, Symbol, KnownSymbol, symbolVal)
@@ -78,7 +77,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 -- import qualified Data.Text.IO as T
 import Data.Text.Encoding (decodeUtf8)
-
+import qualified Data.Kind as K
 
 -- ==============================================
 -- Types
@@ -126,7 +125,7 @@ class HasOCamlType api where
   mkInterface :: Proxy api -> Options -> Map.Map String EmbeddedOCamlFiles -> [Text]
   mkSpec :: Proxy api -> Options -> [Text] -> Maybe Text -> Text -> Map.Map String EmbeddedOCamlFiles -> [Text]
 
-instance (HasOCamlTypeFlag a ~ flag, HasOCamlType' flag (a :: *)) => HasOCamlType a where
+instance (HasOCamlTypeFlag a ~ flag, HasOCamlType' flag (a :: K.Type)) => HasOCamlType a where
   mkType = mkType' (Proxy :: Proxy flag)
   mkInterface = mkInterface' (Proxy :: Proxy flag)
   mkSpec = mkSpec' (Proxy :: Proxy flag)
@@ -225,7 +224,7 @@ instance (HasEmbeddedFile' api) => HasEmbeddedFile api where
 class HasEmbeddedFile' api where
   mkFiles' :: Bool -> Bool -> Proxy api -> Q [Exp]
 
-instance (HasEmbeddedFileFlag a ~ flag, HasEmbeddedFile'' flag (a :: *)) => HasEmbeddedFile' a where
+instance (HasEmbeddedFileFlag a ~ flag, HasEmbeddedFile'' flag (a :: K.Type)) => HasEmbeddedFile' a where
   mkFiles' = mkFiles'' (Proxy :: Proxy flag)
 
 type family (HasEmbeddedFileFlag a) :: Nat where

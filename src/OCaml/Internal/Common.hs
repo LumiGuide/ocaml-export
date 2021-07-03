@@ -15,7 +15,6 @@ module OCaml.Internal.Common where
 -- base
 import Data.Char (toLower,toUpper)
 import qualified Data.List as L
-import Data.Monoid ((<>))
 
 -- aeson
 import qualified Data.Aeson.Types as Aeson (Options(..), defaultOptions)

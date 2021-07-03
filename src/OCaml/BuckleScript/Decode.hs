@@ -23,8 +23,6 @@ module OCaml.BuckleScript.Decode
 import Control.Monad.Reader
 import qualified Data.List as L
 import Data.Maybe (catMaybes)
-import Data.Monoid ((<>))
-import Data.Proxy (Proxy (..))        
 import Data.Typeable
 -- aeson
 import qualified Data.Aeson.Types as Aeson (Options(..))
@@ -171,7 +169,7 @@ instance HasDecoderRef OCamlDatatype where
           Just parOCamlTypeMetaData -> do
             let prefix = stext $ mkModulePrefix decOCamlTypeMetaData parOCamlTypeMetaData
             pure $ parens $ prefix <> name <+> dx
-          Nothing -> fail ("OCaml.BuckleScript.Decode (HasDecoderRef OCamlDataType) expected to find dependency:\n\n" ++ show typeRef ++ "\n\nin\n\n" ++ show ds)
+          Nothing -> error ("OCaml.BuckleScript.Decode (HasDecoderRef OCamlDataType) expected to find dependency:\n\n" ++ show typeRef ++ "\n\nin\n\n" ++ show ds)
   
   -- this should only catch type parameters
   renderRef datatype@(OCamlDatatype typeRef name _) =
@@ -189,7 +187,7 @@ instance HasDecoderRef OCamlDatatype where
               let prefix = stext $ mkModulePrefix decOCamlTypeMetaData parOCamlTypeMetaData
               pure $ prefix <> "decode" <> (stext . textUppercaseFirst $ name)
 
-            Nothing -> fail ("OCaml.BuckleScript.Decode (HasDecoderRef OCamlDataType) expected to find dependency:\n\n" ++ show typeRef ++ "\n\nin\n\n" ++ show ds)
+            Nothing -> error ("OCaml.BuckleScript.Decode (HasDecoderRef OCamlDataType) expected to find dependency:\n\n" ++ show typeRef ++ "\n\nin\n\n" ++ show ds)
 
   renderRef (OCamlPrimitive primitive) = renderRef primitive
 
@@ -266,7 +264,7 @@ instance HasDecoder OCamlValue where
   render ref@(OCamlRef typeRef name) = do
     mOCamlTypeMetaData <- asks topLevelOCamlTypeMetaData
     case mOCamlTypeMetaData of
-      Nothing -> fail $ "OCaml.BuckleScript.Decode (HasDecoder (OCamlRef typeRep name )) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
+      Nothing -> error $ "OCaml.BuckleScript.Decode (HasDecoder (OCamlRef typeRep name )) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
       Just ocamlTypeRef -> do
         ds <- asks (dependencies . userOptions)
         pure $ appendModule ds ocamlTypeRef typeRef name ""
@@ -274,7 +272,7 @@ instance HasDecoder OCamlValue where
   render ref@(OCamlRefApp typRep values) = do
     mOCamlTypeMetaData <- asks topLevelOCamlTypeMetaData
     case mOCamlTypeMetaData of
-      Nothing -> fail $ "OCaml.BuckleScript.Record (HasType (OCamlDatatype typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
+      Nothing -> error $ "OCaml.BuckleScript.Record (HasType (OCamlDatatype typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
       Just ocamlTypeRef -> do
         ds <- asks (dependencies . userOptions)
         dx <- renderRef values
@@ -314,7 +312,7 @@ instance HasDecoderRef OCamlValue where
   renderRef (OCamlRef metadata ref) = do
     mOCamlTypeMetaData <- asks topLevelOCamlTypeMetaData
     case mOCamlTypeMetaData of
-      Nothing -> fail $ "OCaml.BuckleScript.Decode (HasDecoder (OCamlRef typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
+      Nothing -> error $ "OCaml.BuckleScript.Decode (HasDecoder (OCamlRef typeRep name)) mOCamlTypeMetaData is Nothing:\n\n" ++ (show ref)
       Just ocamlTypeRef -> do
         ds <- asks (dependencies . userOptions)
         pure $ stext (appendModule' ds ocamlTypeRef metadata ref)
@@ -421,7 +419,7 @@ renderRefWithUnwrapResult (OCamlDatatype typeRef _ (OCamlValueConstructor (Named
         Just parOCamlTypeMetaData -> do
           let prefix = stext $ mkModulePrefix decOCamlTypeMetaData parOCamlTypeMetaData          
           pure $ parens $ "fun a -> unwrapResult (" <> prefix <> name <+> (wrapIfPrimitive values dx) <+> "a)"
-        Nothing -> fail ("OCaml.BuckleScript.Decode (HasDecoderRef OCamlDataType) expected to find dependency:\n\n" ++ show typeRef ++ "\n\nin\n\n" ++ show ds)
+        Nothing -> error ("OCaml.BuckleScript.Decode (HasDecoderRef OCamlDataType) expected to find dependency:\n\n" ++ show typeRef ++ "\n\nin\n\n" ++ show ds)
 
 renderRefWithUnwrapResult datatype@(OCamlDatatype typeRef name _) = do
   if isTypeParameterRef datatype
@@ -430,14 +428,14 @@ renderRefWithUnwrapResult datatype@(OCamlDatatype typeRef name _) = do
   else do
     mOCamlTypeMetaData <- asks topLevelOCamlTypeMetaData
     case mOCamlTypeMetaData of
-      Nothing -> fail $ "OCaml.BuckleScript.Decode.renderRefWithUnwrapResult mOCamlTypeMetaData is Nothing:\n\n" ++ (show datatype)
+      Nothing -> error $ "OCaml.BuckleScript.Decode.renderRefWithUnwrapResult mOCamlTypeMetaData is Nothing:\n\n" ++ (show datatype)
       Just decOCamlTypeMetaData -> do
         ds <- asks (dependencies . userOptions)
         case Map.lookup typeRef ds of
           Just parOCamlTypeMetaData -> do
             let prefix = stext $ mkModulePrefix decOCamlTypeMetaData parOCamlTypeMetaData
             pure . parens $ "fun a -> unwrapResult (" <> prefix <> "decode" <> (stext . textUppercaseFirst $ name) <+> "a)"
-          Nothing -> fail ("OCaml.BuckleScript.Decode.renderRefWithUnwrapResult expected to find dependency:\n\n" ++ show typeRef ++ "\n\nin\n\n" ++ show ds)
+          Nothing -> error ("OCaml.BuckleScript.Decode.renderRefWithUnwrapResult expected to find dependency:\n\n" ++ show typeRef ++ "\n\nin\n\n" ++ show ds)
 renderRefWithUnwrapResult ref = renderRef ref
 
     
